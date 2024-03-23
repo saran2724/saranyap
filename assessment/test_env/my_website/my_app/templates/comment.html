@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Comment</title>
+</head>
+<body>
+    <h1>Add Comment</h1>
+    <form id="comment-form" method="post" action="{% url 'comment_view' %}">
+        {% csrf_token %}
+        <textarea id="comment-text" name="comment_text" placeholder="Add a comment"></textarea>
+        <button type="submit">Submit</button>
+    </form>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+       $(document).ready(function() {
+            $('#comment-form').submit(function(e) {
+                e.preventDefault(); 
+                var commentText = $('#comment-text').val();
+                console.log(commentText)
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/comment_view/',
+                    type: 'POST',
+                    data: {'commentText': commentText, 
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'},
+                    
+                    success: function(data) {
+                        console.log(data)
+                        if (data.status === 'success') {
+                            window.close();
+                            $('#comments-list').append('<li>' + commentText + '</li>');
+                        } else {
+                            console.error('Failed to submit comment:', data.message);
+                        }
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.error('Error submitting comment:', xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
